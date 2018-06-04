@@ -10,6 +10,7 @@ public class RunCompute : MonoBehaviour
     // struct
     struct Particle
     {
+        public Vector3 SpawnPos;
         public Vector3 position;
         public Vector3 velocity;
         public float life;
@@ -22,12 +23,12 @@ public class RunCompute : MonoBehaviour
     /// 4 floats = 16 bytes
 	/// </summary>
 	//private const int SIZE_PARTICLE = 24;
-    private const int SIZE_PARTICLE = 40; // since property "life" is added...
+    private const int SIZE_PARTICLE =52; // since property "life" is added...
 
     /// <summary>
     /// Number of Particle created in the system.
     /// </summary>
-    private int particleCount = 100000;
+    private int particleCount = 1000000;
 
     /// <summary>
     /// Material used to draw the Particle on screen.
@@ -95,9 +96,9 @@ public class RunCompute : MonoBehaviour
             verts[verexs]=transform.TransformPoint(verts[verexs]);
             normals[verexs]=transform.TransformDirection(normals[verexs]);
 
-            particleArray[i].position.x = verts[verexs].x;
-            particleArray[i].position.y = verts[verexs].y; 
-            particleArray[i].position.z = verts[verexs].z;
+            particleArray[i].SpawnPos.x = particleArray[i].position.x = verts[verexs].x;
+            particleArray[i].SpawnPos.y = particleArray[i].position.y = verts[verexs].y; 
+            particleArray[i].SpawnPos.z = particleArray[i].position.z = verts[verexs].z;
 
             particleArray[i].Normal.x = normals[verexs].x;
             particleArray[i].Normal.y =normals[verexs].y;
@@ -155,7 +156,6 @@ public class RunCompute : MonoBehaviour
         // Vector3[] vertices = mesh.vertices;
         if(transform.hasChanged)
         {
-            Debug.Log("nan Dato");
             Vector3 changeFromPrev= (transform.position-prevLoc);
             float[] change = { changeFromPrev.x, changeFromPrev.y, changeFromPrev.z };
 
@@ -167,9 +167,10 @@ public class RunCompute : MonoBehaviour
         //		float[] verts={vertices[i].x,vertices[i].y, vertices[i].z};
         // Send datas to the compute shader
         computeShader.SetFloat("deltaTime", Time.deltaTime);
-        
+        computeShader.SetFloat("totalTime", Time.time);
+
         //	computeShader.SetFloats("newPos", newPos);
-           // computeShader.SetFloats("normals", newNorm);
+        // computeShader.SetFloats("normals", newNorm);
 
         // Update the Particles
         //}

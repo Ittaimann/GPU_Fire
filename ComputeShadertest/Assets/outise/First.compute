@@ -4,6 +4,7 @@
 struct Particle
 {
 	float3 position;
+	float3 SpawnPos;
 	float3 velocity;
 	float life;
 	float3 Normal;
@@ -16,6 +17,7 @@ RWStructuredBuffer<Particle> particleBuffer;
 float deltaTime;
 float3 newPos;
 float3 normals;
+float totalTime;
 
 float nrand(float2 uv)
 {
@@ -38,16 +40,18 @@ uint rand_xorshift()
 void CSParticle(uint3 id : SV_DispatchThreadID)
 {
 	// subtract the life based on deltaTime
-	particleBuffer[id.x].life += deltaTime;
+	particleBuffer[id.x].life -= deltaTime;
 
 	//float3 delta = float3(mousePosition.xy, 3) - particleBuffer[id.x].position;
 	//float3 dir = normalize(delta);
 
 	//particleBuffer[id.x].velocity = float3(0.0,.001,0.0);
-	particleBuffer[id.x].position += newPos;
-	
-	
-/*	if (particleBuffer[id.x].life < 0)
+	particleBuffer[id.x].SpawnPos += newPos;
+	particleBuffer[id.x].velocity= float3(sin(totalTime)/100,.005,.0);
+	particleBuffer[id.x].position+= particleBuffer[id.x].velocity;
+	//particleBuffer[id.x].position.x=particleBuffer[id.x].life;
+
+	if (particleBuffer[id.x].life < 0)
 	{
 	// {
 	// 	// http://www.reedbeta.com/blog/quick-and-easy-gpu-random-numbers-in-d3d11/
@@ -57,12 +61,13 @@ void CSParticle(uint3 id : SV_DispatchThreadID)
 	 	float f2 = float(rand_xorshift()) * (1.0 / 4294967296.0) - 0.5;
 	 	float3 normalF3 = normalize(float3(f0, f1, f2)) * 0.8f;
 	 	normalF3 *= float(rand_xorshift()) * (1.0 / 4294967296.0);
-		particleBuffer[id.x].position = float3(normalF3.x/10 + newPos.x, normalF3.y/10 + newPos.y, normalF3.z/10 + newPos.z);
-	// 	// reset the life of this particle
+//		particleBuffer[id.x].position = float3(normalF3.x/10 + newPos.x, normalF3.y/10 + newPos.y, normalF3.z/10 + newPos.z);
+	// 	// reset the life of this particle*/
 	 	particleBuffer[id.x].life = 4;
-		 particleBuffer[id.x].Normal=normals;
+		 //particleBuffer[id.x].Normal=normals;
+		 particleBuffer[id.x].position=particleBuffer[id.x].SpawnPos+float3(normalF3.x/10 + newPos.x, normalF3.y/10 + newPos.y, normalF3.z/10 + newPos.z);;
 	// //	particleBuffer[id.x].velocity = float3(normalF3.x , normalF3.y,normalF3.z+3.0);
 	
-	}*/
+	}
 
 }

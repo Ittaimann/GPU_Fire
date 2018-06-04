@@ -18,6 +18,7 @@
 
 		struct Particle{
 			float3 position;
+			float3 SpawnPos;
 			float3 velocity;
 			float life;
 			float3 Normal;
@@ -41,8 +42,10 @@
 			float lerpVal = life * 0.25f;
 			//o.color = fixed4(sin(particleBuffer[instance_id].position.x), sin(particleBuffer[instance_id].position.y),sin(particleBuffer[instance_id].position.z), lerpVal);
 			// Position
-			o.color = fixed4(sin(particleBuffer[instance_id].position.x),sin(particleBuffer[instance_id].position.y),sin(particleBuffer[instance_id].position.z),1);
+			 //fixed4(1.0f - lerpVal+0.1, lerpVal+0.1, 1.0f, lerpVal);
+			o.color = fixed4(lerpVal,sin(particleBuffer[instance_id].position.y*10),0,1);
 			o.position = UnityObjectToClipPos(float4(particleBuffer[instance_id].position, 1.0f));
+		
 			o.color.a=saturate(dot(particleBuffer[instance_id].Normal,normalize(_WorldSpaceCameraPos-particleBuffer[instance_id].position)));
 
 			return o;
