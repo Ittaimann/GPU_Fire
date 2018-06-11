@@ -65,7 +65,7 @@ void CSParticle(uint3 id : SV_DispatchThreadID)
 	// 	// reset the life of this particle*/
 	 	particleBuffer[id.x].life = 4;
 		 //particleBuffer[id.x].Normal=normals;
-		 particleBuffer[id.x].position=particleBuffer[id.x].SpawnPos+float3(normalF3.x + newPos.x, normalF3.y + newPos.y, normalF3.z + newPos.z);;
+		 particleBuffer[id.x].position=particleBuffer[id.x].SpawnPos+float3(normalF3.x/10 + newPos.x, normalF3.y/10 + newPos.y, normalF3.z/10 + newPos.z);;
 	// //	particleBuffer[id.x].velocity = float3(normalF3.x , normalF3.y,normalF3.z+3.0);
 	
 	}
