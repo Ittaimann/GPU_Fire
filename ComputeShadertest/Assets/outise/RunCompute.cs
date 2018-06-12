@@ -109,7 +109,7 @@ public class RunCompute : MonoBehaviour
             particleArray[i].velocity.z = 0;
 
             // Initial life value
-            particleArray[i].life = Random.value * 5.0f + 1.0f;
+            particleArray[i].life = Random.value * 2.0f + 1.0f;
             verexs+=1;
             if(verexs>=mesh.vertexCount)
             {
@@ -168,7 +168,8 @@ public class RunCompute : MonoBehaviour
         // Send datas to the compute shader
         computeShader.SetFloat("deltaTime", Time.deltaTime);
         computeShader.SetFloat("totalTime", Time.time);
-
+        float[] ObjPos= {transform.position.x,transform.position.y,transform.position.z};
+        computeShader.SetFloats("ObjPos", ObjPos);
         //	computeShader.SetFloats("newPos", newPos);
         // computeShader.SetFloats("normals", newNorm);
 

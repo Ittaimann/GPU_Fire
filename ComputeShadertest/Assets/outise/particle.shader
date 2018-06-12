@@ -2,9 +2,9 @@
 
 	SubShader {
 		Pass {
-		Tags{ "RenderType" = "Opaque" }
+		Tags{ "RenderType" = "Transparent"  }
 		LOD 200
-		//Blend one one
+		Blend SrcAlpha OneMinusSrcAlpha
 
 		CGPROGRAM
 		// Physically based Standard lighting model, and enable shadows on all light types
@@ -28,6 +28,7 @@
 			float4 position : SV_POSITION;
 			float4 color : COLOR;
 			float life : LIFE;
+			//float3 worldNormal;
 		};
 		// particles' data
 		StructuredBuffer<Particle> particleBuffer;
@@ -39,15 +40,14 @@
 
 			// Color
 			float life = particleBuffer[instance_id].life;
-			float lerpVal = life * 0.25f;
+			float lerpVal = life * 0.5f;
 			//o.color = fixed4(sin(particleBuffer[instance_id].position.x), sin(particleBuffer[instance_id].position.y),sin(particleBuffer[instance_id].position.z), lerpVal);
 			// Position
 			 //fixed4(1.0f - lerpVal+0.1, lerpVal+0.1, 1.0f, lerpVal);
-			o.color = fixed4(sin(particleBuffer[instance_id].position.y)*lerpVal,sin(particleBuffer[instance_id].position.x)*lerpVal,sin(_Time.w+15),1);
+			o.color = fixed4(abs(particleBuffer[instance_id].velocity.z)+abs(particleBuffer[instance_id].velocity.x) +saturate(lerpVal-.1)  ,saturate(lerpVal-.5) ,  0  ,lerpVal*.9);
 			o.position = UnityObjectToClipPos(float4(particleBuffer[instance_id].position, 1.0f));
 		
-			o.color.a=saturate(dot(particleBuffer[instance_id].Normal,normalize(_WorldSpaceCameraPos-particleBuffer[instance_id].position)));
-
+			
 			return o;
 		}
 
