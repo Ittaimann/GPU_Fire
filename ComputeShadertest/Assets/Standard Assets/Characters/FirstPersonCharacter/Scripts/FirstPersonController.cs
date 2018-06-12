@@ -41,6 +41,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
         private float m_NextStep;
         private bool m_Jumping;
         private AudioSource m_AudioSource;
+        private Vector3 orig_cam;
 
         // Use this for initialization
         private void Start()
@@ -55,6 +56,7 @@ namespace UnityStandardAssets.Characters.FirstPerson
             m_Jumping = false;
             m_AudioSource = GetComponent<AudioSource>();
 			m_MouseLook.Init(transform , m_Camera.transform);
+            orig_cam = m_Camera.transform.localPosition;
         }
 
 
@@ -131,6 +133,15 @@ namespace UnityStandardAssets.Characters.FirstPerson
             UpdateCameraPosition(speed);
 
             m_MouseLook.UpdateCursorLock();
+
+            if(Input.GetKeyDown(KeyCode.C))
+            {
+                m_Camera.transform.localPosition = orig_cam - new Vector3(0, 1, 0);
+            }
+            else if (Input.GetKeyUp(KeyCode.C))
+            {
+                m_Camera.transform.localPosition = orig_cam;
+            }
         }
 
 
