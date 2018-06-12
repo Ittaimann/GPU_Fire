@@ -12,13 +12,18 @@ public class Flicker : MonoBehaviour {
         l = GetComponent<Light>();
         StartCoroutine(flick());
 	}
-	
-	IEnumerator flick()
+    private void Update()
+    {
+        l.intensity = Mathf.Lerp(.2f, 1.2f, (Mathf.Sin(Time.time) + 1 ) /2);
+
+    }
+
+    IEnumerator flick()
     {
         while(true)
         {
-            yield return new WaitForSeconds(Random.Range(0.03f, 0.1f));
-            l.intensity = Random.Range(0.2f, 1.2f);
+            yield return new WaitForSeconds(Random.Range(0.05f, 0.1f));
+            transform.position = new Vector3(0, Random.Range(.3f, .4f),0);
         }
     }
 }
