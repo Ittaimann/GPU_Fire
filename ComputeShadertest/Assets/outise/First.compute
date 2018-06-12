@@ -62,6 +62,8 @@ void CSParticle(uint3 id : SV_DispatchThreadID)
 	//particleBuffer[id.x].velocity = float3(0.0,.001,0.0);
 	particleBuffer[id.x].SpawnPos += newPos;
 	particleBuffer[id.x].velocity =  float3(noise.x,abs(noise.y),noise.z)*abs(particleBuffer[id.x].life-2) +float3(sin(totalTime)/50,.01,0);//float3(snoise(particleBuffer[id.x].position*.01),abs(snoise(particleBuffer[id.x].SpawnPos*.01)),0);//+float3(0,.01,.0);
+	if(particleBuffer[id.x].life > 1.1f)
+		particleBuffer[id.x].velocity = float3(particleBuffer[id.x].velocity.x / 3, particleBuffer[id.x].velocity.y, particleBuffer[id.x].velocity.z / 3);
 	particleBuffer[id.x].position+= particleBuffer[id.x].velocity;
 	//particleBuffer[id.x].position.x=particleBuffer[id.x].life;
 
