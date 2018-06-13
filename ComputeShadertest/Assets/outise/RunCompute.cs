@@ -1,11 +1,19 @@
-﻿using System.Collections;
+﻿/*
+Heavily based on https://gist.github.com/ya7gisa0/742bf24d5edf1e73b971e14a2553ad4e with a 
+lot of modifications. It was the only bones for the particle system we were looking for that 
+I could find. We removed elements from it were adding others, but becuase the nature of the project
+constantly changing (mostly due to ittai constantly trying to experiment) a lot of the original code stayed.
+We removed most of what was there to create their effect, but the set up for the compute shader stayed pretty much the same. 
+ */
+
+
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class RunCompute : MonoBehaviour
 {
 
-    private Vector2 cursorPos;
 
     // struct
     struct Particle
@@ -17,49 +25,31 @@ public class RunCompute : MonoBehaviour
         public Vector3 Normal;
     }
 
-    /// <summary>
-	/// Size in octet of the Particle struct.
-    /// since float = 4 bytes...
-    /// 4 floats = 16 bytes
-	/// </summary>
-	//private const int SIZE_PARTICLE = 24;
-    private const int SIZE_PARTICLE =52; // since property "life" is added...
+  
+    private const int SIZE_PARTICLE =52; // how many bytes an individual particle is. each float is 4 bytes, so 4 float 4's and a float make 52 bytes per particle
 
-    /// <summary>
-    /// Number of Particle created in the system.
-    /// </summary>
+  
     private int particleCount = 1000000;
 
-    /// <summary>
-    /// Material used to draw the Particle on screen.
-    /// </summary>
+    /// Material with particle shader used to draw the Particle on screen.
     public Material material;
 
-    /// <summary>
     /// Compute shader used to update the Particles.
-    /// </summary>
     public ComputeShader computeShader;
 
-    /// <summary>
     /// Id of the kernel used.
-    /// </summary>
     private int mComputeShaderKernelID;
 
-    /// <summary>
     /// Buffer holding the Particles.
-    /// </summary>
     ComputeBuffer particleBuffer;
 
-    /// <summary>
     /// Number of particle per warp.
-    /// </summary>
-    private const int WARP_SIZE = 256; // TODO?
+    private const int WARP_SIZE = 256;
 
-    /// <summary>
-    /// Number of warp needed.
-    /// </summary>
-    private int mWarpCount; // TODO?
+    // number of threads? this is from the example code and im not entirely sure about how it relates
+    private int mWarpCount; 
 
+    // mesh used as the spawn verticies for the particles
     private Mesh mesh;
     //public ComputeShader shader;
     Vector3 prevLoc;
@@ -86,13 +76,7 @@ public class RunCompute : MonoBehaviour
 
         for (int i = 0; i < particleCount; i++)
         {
-           /* float x = Random.value * 2 - 1.0f;
-            float y = Random.value * 2 - 1.0f;
-            float z = Random.value * 2 - 1.0f;
-            Vector3 xyz = new Vector3(x, y, z);
-            xyz.Normalize();
-            xyz *= Random.value;
-            xyz *= 0.5f;*/
+          
             verts[verexs]=transform.TransformPoint(verts[verexs]);
             normals[verexs]=transform.TransformDirection(normals[verexs]);
 
@@ -100,6 +84,7 @@ public class RunCompute : MonoBehaviour
             particleArray[i].SpawnPos.y = particleArray[i].position.y = verts[verexs].y; 
             particleArray[i].SpawnPos.z = particleArray[i].position.z = verts[verexs].z;
 
+            // never really used in the program /shrug
             particleArray[i].Normal.x = normals[verexs].x;
             particleArray[i].Normal.y =normals[verexs].y;
             particleArray[i].Normal.z = normals[verexs].z;
@@ -146,14 +131,6 @@ public class RunCompute : MonoBehaviour
     void Update()
     {   
         
-    //    Vector3 newPoint=transform.TransformPoint(mesh.vertices[Random.Range(0, mesh.vertexCount)]);
-       // Vector3 newNormals = transform.TransformPoint(mesh.normals[Random.Range(0, mesh.vertexCount)]);
-
-//        float[] newPos = {newPoint.x,newPoint.y,newPoint.z};
-  //      float[] newNorm = { newNormals.x, newNormals.y, newNormals.z };
-
-        // Mesh mesh = GetComponent<MeshFilter>().mesh;
-        // Vector3[] vertices = mesh.vertices;
         if(transform.hasChanged)
         {
             Vector3 changeFromPrev= (transform.position-prevLoc);
@@ -163,18 +140,12 @@ public class RunCompute : MonoBehaviour
 
         }
 
-        //	while(i<vertices.Length){
-        //		float[] verts={vertices[i].x,vertices[i].y, vertices[i].z};
-        // Send datas to the compute shader
+
         computeShader.SetFloat("deltaTime", Time.deltaTime);
         computeShader.SetFloat("totalTime", Time.time);
         float[] ObjPos= {transform.position.x,transform.position.y,transform.position.z};
         computeShader.SetFloats("ObjPos", ObjPos);
-        //	computeShader.SetFloats("newPos", newPos);
-        // computeShader.SetFloats("normals", newNorm);
-
-        // Update the Particles
-        //}
+       
         computeShader.Dispatch(mComputeShaderKernelID, mWarpCount, 1, 1);
         prevLoc=transform.position;
     }

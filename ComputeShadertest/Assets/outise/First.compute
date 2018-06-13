@@ -1,5 +1,8 @@
 ﻿#pragma kernel CSParticle
 
+// included file for generating perlin noise on the gpu instead of needing to 
+// generate it on the cpu and pass it theoretically holding up the usage or creating a 
+// messy inconsistent noise. Pulled from a git repo commented in that code
 #include "ClassicNoise3D.hlsl"
 
  // Particle's data
@@ -22,14 +25,11 @@ float3 normals;
 float totalTime;
 float3 ObjPos;
 
-float nrand(float2 uv)
-{
-	return frac(sin(dot(uv, float2(12.9898, 78.233))) * 43758.5453);
-}
 
 uint rng_state;
 
 
+// from the original example
 uint rand_xorshift()
 {
 	// Xorshift algorithm from George Marsaglia's paper
@@ -40,7 +40,7 @@ uint rand_xorshift()
 }
 
 // https://github.com/cabbibo/glsl-curl-noise/blob/master/curl.glsl
-float3 snoiseVec3(float3 x) {
+float3 cnoiseVec3(float3 x) {
 
 	float s = cnoise(x);
 	float s1 = cnoise(float3(x.y - 19.1, x.z + 33.4, x.x + 47.2));
@@ -56,16 +56,16 @@ void CSParticle(uint3 id : SV_DispatchThreadID)
 	// subtract the life based on deltaTime
 	particleBuffer[id.x].life -= deltaTime;
 
-	//float3 delta = float3(mousePosition.xy, 3) - particleBuffer[id.x].position;
-	//float3 dir = normalize(delta);
-	float3 noise= snoiseVec3(particleBuffer[id.x].position)/50;
-	//particleBuffer[id.x].velocity = float3(0.0,.001,0.0);
+	
+	float3 noise= cnoiseVec3(particleBuffer[id.x].position)/50;
 	particleBuffer[id.x].SpawnPos += newPos;
 	particleBuffer[id.x].velocity =  float3(noise.x,abs(noise.y),noise.z)*abs(particleBuffer[id.x].life-2.5) +float3(sin(totalTime)/50,.01,0);//float3(snoise(particleBuffer[id.x].position*.01),abs(snoise(particleBuffer[id.x].SpawnPos*.01)),0);//+float3(0,.01,.0);
+
+
 	if(particleBuffer[id.x].life > 1.1f)
 		particleBuffer[id.x].velocity = float3(particleBuffer[id.x].velocity.x / 3, particleBuffer[id.x].velocity.y, particleBuffer[id.x].velocity.z / 3);
+
 	particleBuffer[id.x].position+= particleBuffer[id.x].velocity;
-	//particleBuffer[id.x].position.x=particleBuffer[id.x].life;
 
 	if (particleBuffer[id.x].life < 0)
 	{
@@ -77,12 +77,11 @@ void CSParticle(uint3 id : SV_DispatchThreadID)
 	 	float f2 = float(rand_xorshift()) * (1.0 / 4294967296.0) - 0.5;
 	 	float3 normalF3 = normalize(float3(f0, f1, f2)) * 0.8f;
 	 	normalF3 *= float(rand_xorshift()) * (1.0 / 4294967296.0);
-//		particleBuffer[id.x].position = float3(normalF3.x/10 + newPos.x, normalF3.y/10 + newPos.y, normalF3.z/10 + newPos.z);
-	// 	// reset the life of this particle*/
+
+		// reset particle lifes
 	 	particleBuffer[id.x].life = 2;
-		 //particleBuffer[id.x].Normal=normals;
+		// place particle at its new spawn position if the fire has moved plus the random offsets
 		 particleBuffer[id.x].position=particleBuffer[id.x].SpawnPos+float3(normalF3.x/10 + newPos.x, normalF3.y/10 + newPos.y, normalF3.z/10 + newPos.z);;
-	// //	particleBuffer[id.x].velocity = float3(normalF3.x , normalF3.y,normalF3.z+3.0);
 	
 	}
 
